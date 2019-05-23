@@ -143,14 +143,7 @@ int main(int argc, char* argv[])
 				{
 					count++;
 
-					if (count % 6 == 5)
-					{
-						capt = 0;
-						cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
-						cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
-					}
-
-					if (count % 6 > 0 && count % 6 < 4)
+					if (count > 0 && count < 4)
 					{
 						cntImagesNum++;
 
@@ -161,6 +154,13 @@ int main(int argc, char* argv[])
 						imwrite(strFileName, imR);
 
 						cout << "+Images with index " << cntImagesNum << " has been collected" << endl;
+					}
+					else if (count == 5)
+					{
+						capt = 0;
+						count = -1;
+						cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
+						cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
 					}
 
 				}

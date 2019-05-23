@@ -94,6 +94,8 @@ int main(int argc, char* argv[])
 
 		int cntImagesNum = -1; // Initialize counter of images to store them with index number
 		string strFileName; // Filename string of images to store
+		int count = -1; // Initialize counter of images acquired in each LightCrafter projection
+		bool capture = 0; // Bool variable to handle the image capture process. True if capture, false if not
 
 		CPylonImage imgLeft, imgRight; // pylon images
 		Mat imL, imR, imLrs, imRrs, cat; // OpenCV matrices
@@ -118,8 +120,7 @@ int main(int argc, char* argv[])
 		// Start grabbing cameras
 		cameras.StartGrabbing(Pylon::GrabStrategy_LatestImageOnly, Pylon::GrabLoop_ProvidedByUser);
 
-		int count = -1;
-		bool capt = 0;
+
 		while (cameras.IsGrabbing())
 		{
 			// Basler frame capture
@@ -139,7 +140,7 @@ int main(int argc, char* argv[])
 				imR = Mat(ptrGrabResultR->GetHeight(), ptrGrabResultR->GetWidth(), CV_8UC1, (uint8_t *)imgRight.GetBuffer());
 
 
-				if (capt)
+				if (capture)
 				{
 					count++;
 
@@ -157,7 +158,7 @@ int main(int argc, char* argv[])
 					}
 					else if (count == 5)
 					{
-						capt = 0;
+						capture = 0; // Not capture
 						count = -1;
 						cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
 						cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
@@ -182,7 +183,7 @@ int main(int argc, char* argv[])
 				else if (c == 'c')
 				{
 
-					capt = 1;
+					capture = 1; // Enable capture
 
 					cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_On);
 					cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_On);

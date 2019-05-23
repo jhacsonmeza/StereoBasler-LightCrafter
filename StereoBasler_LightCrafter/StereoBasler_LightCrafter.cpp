@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 		int iR, iL; // Index of cameras
 		CGrabResultPtr ptrGrabResultL, ptrGrabResultR; // Store retrieve result as pointer of both cameras
 
-		int cntImagesNum = 0; // Initialize counter of images to store them with index number
+		int cntImagesNum = -1; // Initialize counter of images to store them with index number
 		string strFileName; // Filename string of images to store
 
 		CPylonImage imgLeft, imgRight; // pylon images
@@ -118,14 +118,13 @@ int main(int argc, char* argv[])
 		// Start grabbing cameras
 		cameras.StartGrabbing(Pylon::GrabStrategy_LatestImageOnly, Pylon::GrabLoop_ProvidedByUser);
 
-
+		int count = -1;
 		bool capt = 0;
 		while (cameras.IsGrabbing())
 		{
 			// Basler frame capture
 			cameras[iL].RetrieveResult(INFINITE, ptrGrabResultL, TimeoutHandling_ThrowException);
 			cameras[iR].RetrieveResult(INFINITE, ptrGrabResultR, TimeoutHandling_ThrowException);
-			cout << "Status: " << cameras[0].AcquisitionStatus() << endl;
 
 
 			// If the image was grabbed successfully.
@@ -138,6 +137,33 @@ int main(int argc, char* argv[])
 				// Convet right image to pylon image and then to Mat
 				formatConverter.Convert(imgRight, ptrGrabResultR);
 				imR = Mat(ptrGrabResultR->GetHeight(), ptrGrabResultR->GetWidth(), CV_8UC1, (uint8_t *)imgRight.GetBuffer());
+
+
+				if (capt)
+				{
+					count++;
+
+					if (count % 6 == 5)
+					{
+						capt = 0;
+						cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
+						cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
+					}
+
+					if (count % 6 > 0 && count % 6 < 4)
+					{
+						cntImagesNum++;
+
+						strFileName = root.string() + "L\\left" + to_string(cntImagesNum) + ".bmp";
+						imwrite(strFileName, imL);
+
+						strFileName = root.string() + "R\\right" + to_string(cntImagesNum) + ".bmp";
+						imwrite(strFileName, imR);
+
+						cout << "+Images with index " << cntImagesNum << " has been collected" << endl;
+					}
+
+				}
 
 
 				// Resize basler and US images for visualization purposes
@@ -164,52 +190,6 @@ int main(int argc, char* argv[])
 					if (LightCrafterFlash(150000, 150000, 0, "0-1-2") < 0) // LightCrafterFlash(120000, 120000, 0, "0-1-2") LightCrafterFlash(400000, 400000, 0, "0-1-2")
 						return -1;
 				}
-			}
-
-			if (ptrGrabResultL->GrabSucceeded() && ptrGrabResultR->GrabSucceeded() && capt)
-			{
-
-				// Convet left image to pylon image and then to Mat
-				formatConverter.Convert(imgLeft, ptrGrabResultL);
-				imL = Mat(ptrGrabResultL->GetHeight(), ptrGrabResultL->GetWidth(), CV_8UC1, (uint8_t *)imgLeft.GetBuffer());
-
-				// Convet right image to pylon image and then to Mat
-				formatConverter.Convert(imgRight, ptrGrabResultR);
-				imR = Mat(ptrGrabResultR->GetHeight(), ptrGrabResultR->GetWidth(), CV_8UC1, (uint8_t *)imgRight.GetBuffer());
-
-
-				strFileName = root.string() + "L\\left" + to_string(cntImagesNum) + ".bmp";
-				imwrite(strFileName, imL);
-
-				strFileName = root.string() + "R\\right" + to_string(cntImagesNum) + ".bmp";
-				imwrite(strFileName, imR);
-
-				cout << "+Images with index " << cntImagesNum << " has been collected" << endl;
-
-				cntImagesNum++;
-				if (cntImagesNum > 6)
-				{
-					cntImagesNum = 0;
-					capt = 0;
-					cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
-					cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
-				}
-
-
-				// Resize basler and US images for visualization purposes
-				resize(imL, imLrs, Size(620, 480));
-				resize(imR, imRrs, Size(620, 480));
-
-				// Concatenate three images
-				hconcat(imLrs, imRrs, cat);
-
-				// show images
-				imshow("Acquisition", cat);
-				char c = waitKey(1);
-
-				if (c == 27)
-					break;
-
 			}
 		}
 

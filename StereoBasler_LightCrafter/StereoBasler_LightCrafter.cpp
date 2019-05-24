@@ -4,8 +4,8 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include <filesystem>
-#include <stdexcept>
 
 #include "LightCrafter/LC_Flash.h"
 
@@ -97,9 +97,12 @@ int main(int argc, char* argv[])
 		int cntImTrigg = -1; // Initialize counter of images acquired through trigger sent by the LightCrafter in each sequence of images
 		bool capture = 0; // Bool variable to handle the image capture process. True if capture, false if not
 
+		string seq{ "0-1-2" }; // Sequence of images to project
+		auto n = count(seq.begin(), seq.end(), '-') + 1; // Number of images to project
+		n += 3; // Three images without fringes are acquired with the trigger signal
+
 		CPylonImage imgLeft, imgRight; // pylon images
 		Mat imL, imR, imLrs, imRrs, cat; // OpenCV matrices
-		vector<Mat> matrices; // vector of Mat for image concatenation
 		CImageFormatConverter formatConverter;
 
 
@@ -144,7 +147,7 @@ int main(int argc, char* argv[])
 				{
 					cntImTrigg++;
 
-					if (cntImTrigg > 0 && cntImTrigg < 4)
+					if (cntImTrigg > 0 && cntImTrigg < n-2)
 					{
 						cntImagesNum++;
 
@@ -156,12 +159,13 @@ int main(int argc, char* argv[])
 
 						cout << "+Images with index " << cntImagesNum << " has been collected" << endl;
 					}
-					else if (cntImTrigg == 5)
+					else if (cntImTrigg == n-1)
 					{
 						capture = 0; // Not capture
 						cntImTrigg = -1;
 						cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
 						cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
+						cout << endl;
 					}
 
 				}
@@ -188,7 +192,7 @@ int main(int argc, char* argv[])
 					cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_On);
 					cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_On);
 
-					if (LightCrafterFlash(150000, 150000, 0, "0-1-2") < 0) // LightCrafterFlash(120000, 120000, 0, "0-1-2") LightCrafterFlash(400000, 400000, 0, "0-1-2")
+					if (LightCrafterFlash(150000, 150000, 0, seq) < 0) // LightCrafterFlash(120000, 120000, 0, "0-1-2") LightCrafterFlash(400000, 400000, 0, "0-1-2")
 						return -1;
 				}
 			}

@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
 		int cntImagesNum = -1; // Initialize counter of images to store them with index number
 		string strFileName; // Filename string of images to store
-		int count = -1; // Initialize counter of images acquired in each LightCrafter projection
+		int cntImTrigg = -1; // Initialize counter of images acquired through trigger sent by the LightCrafter in each sequence of images
 		bool capture = 0; // Bool variable to handle the image capture process. True if capture, false if not
 
 		CPylonImage imgLeft, imgRight; // pylon images
@@ -142,9 +142,9 @@ int main(int argc, char* argv[])
 
 				if (capture)
 				{
-					count++;
+					cntImTrigg++;
 
-					if (count > 0 && count < 4)
+					if (cntImTrigg > 0 && cntImTrigg < 4)
 					{
 						cntImagesNum++;
 
@@ -156,10 +156,10 @@ int main(int argc, char* argv[])
 
 						cout << "+Images with index " << cntImagesNum << " has been collected" << endl;
 					}
-					else if (count == 5)
+					else if (cntImTrigg == 5)
 					{
 						capture = 0; // Not capture
-						count = -1;
+						cntImTrigg = -1;
 						cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
 						cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
 					}

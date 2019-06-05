@@ -195,6 +195,22 @@ int main(int argc, char* argv[])
 					if (LightCrafterFlash(150000, 150000, 0, seq) < 0) // LightCrafterFlash(120000, 120000, 0, "0-1-2") LightCrafterFlash(400000, 400000, 0, "0-1-2")
 						return -1;
 				}
+				else if (c == 'd' & cntImTrigg > -1 & !capture)
+				{
+					for (int i = 0; i < n - 3; i++)
+					{
+						strFileName = root.string() + "L\\left" + to_string(cntImagesNum) + ".bmp";
+						remove((path)strFileName);
+
+						strFileName = root.string() + "R\\right" + to_string(cntImagesNum) + ".bmp";
+						remove((path)strFileName);
+
+						cout << "-Images with index " << cntImagesNum << " has been deleted" << endl;
+
+						cntImagesNum--;
+					}
+					cout << endl;
+				}
 			}
 		}
 

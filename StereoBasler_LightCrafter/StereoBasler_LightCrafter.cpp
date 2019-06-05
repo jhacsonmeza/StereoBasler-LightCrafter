@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
 
 				if (c == 27)
 					break;
-				else if (c == 'c')
+				else if (c == 'c' & !capture)
 				{
 
 					capture = 1; // Enable capture

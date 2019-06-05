@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
 
 				if (c == 27)
 					break;
-				else if (c == 'c' & !capture)
+				else if ((c == 'c') & !capture)
 				{
 
 					capture = 1; // Enable capture
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
 					if (LightCrafterFlash(150000, 150000, 0, seq) < 0) // LightCrafterFlash(120000, 120000, 0, "0-1-2") LightCrafterFlash(400000, 400000, 0, "0-1-2")
 						return -1;
 				}
-				else if (c == 'd' & cntImTrigg > -1 & !capture)
+				else if ((c == 'd') & (cntImagesNum > -1) & !capture)
 				{
 					for (int i = 0; i < n - 3; i++)
 					{

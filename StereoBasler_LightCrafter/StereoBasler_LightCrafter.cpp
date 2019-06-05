@@ -96,6 +96,7 @@ int main(int argc, char* argv[])
 		string strFileName; // Filename string of images to store
 		int cntImTrigg = -1; // Initialize counter of images acquired through trigger sent by the LightCrafter in each sequence of images
 		bool capture = 0; // Bool variable to handle the image capture process. True if capture, false if not
+		int cntCapt = -1; // Capture process counter
 
 		string seq{ "0-1-2" }; // Sequence of images to project
 		auto n = count(seq.begin(), seq.end(), '-') + 1; // Number of images to project
@@ -151,21 +152,22 @@ int main(int argc, char* argv[])
 					{
 						cntImagesNum++;
 
-						strFileName = root.string() + "L\\left" + to_string(cntImagesNum) + ".bmp";
+						strFileName = root.string() + "L\\left" + to_string(cntCapt) + "_" + to_string(cntImagesNum) + ".bmp";
 						imwrite(strFileName, imL);
 
-						strFileName = root.string() + "R\\right" + to_string(cntImagesNum) + ".bmp";
+						strFileName = root.string() + "R\\right" + to_string(cntCapt) + "_" + to_string(cntImagesNum) + ".bmp";
 						imwrite(strFileName, imR);
-
-						cout << "+Images with index " << cntImagesNum << " has been collected" << endl;
 					}
 					else if (cntImTrigg == n-1)
 					{
 						capture = 0; // Not capture
-						cntImTrigg = -1;
+						cntImagesNum = -1; // Restart counter
+						cntImTrigg = -1; // Restart counter
+
 						cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
 						cameras[1].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_Off);
-						cout << endl;
+
+						cout << "+Capture " << cntCapt << " complete" << endl;
 					}
 
 				}
@@ -186,7 +188,7 @@ int main(int argc, char* argv[])
 					break;
 				else if ((c == 'c') & !capture)
 				{
-
+					cntCapt++; // New capture
 					capture = 1; // Enable capture
 
 					cameras[0].TriggerMode.SetValue(Basler_UsbCameraParams::TriggerMode_On);
@@ -195,21 +197,21 @@ int main(int argc, char* argv[])
 					if (LightCrafterFlash(150000, 150000, 0, seq) < 0) // LightCrafterFlash(120000, 120000, 0, "0-1-2") LightCrafterFlash(400000, 400000, 0, "0-1-2")
 						return -1;
 				}
-				else if ((c == 'd') & (cntImagesNum > -1) & !capture)
+				else if ((c == 'd') & (cntCapt > -1) & !capture)
 				{
 					for (int i = 0; i < n - 3; i++)
 					{
-						strFileName = root.string() + "L\\left" + to_string(cntImagesNum) + ".bmp";
+						cntImagesNum++;
+
+						strFileName = root.string() + "L\\left" + to_string(cntCapt) + "_" + to_string(cntImagesNum) + ".bmp";
 						remove((path)strFileName);
 
-						strFileName = root.string() + "R\\right" + to_string(cntImagesNum) + ".bmp";
+						strFileName = root.string() + "R\\left" + to_string(cntCapt) + "_" + to_string(cntImagesNum) + ".bmp";
 						remove((path)strFileName);
-
-						cout << "-Images with index " << cntImagesNum << " has been deleted" << endl;
-
-						cntImagesNum--;
 					}
-					cout << endl;
+					cout << "-Capture " << cntCapt-- << " has been deleted" << endl;
+
+					cntImagesNum = -1; // Restart counter
 				}
 			}
 		}
